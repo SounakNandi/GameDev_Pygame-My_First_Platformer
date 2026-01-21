@@ -41,6 +41,18 @@ class Player:
             }
         }
 
+        self.sounds = {
+            'run': pygame.mixer.Sound(os.path.join('.','Assets','Audio','run.mp3')),
+            'jump': pygame.mixer.Sound(os.path.join('.','Assets','Audio','jump.mp3')),
+            'highJump': pygame.mixer.Sound(os.path.join('.','Assets','Audio','highJump.mp3')),
+            'openDoor': pygame.mixer.Sound(os.path.join('.','Assets','Audio','openDoor.mp3'))
+        }
+        self.soundChannels = {
+            'run': pygame.mixer.Channel(0),
+            'jump': pygame.mixer.Channel(1),
+            'openDoor': pygame.mixer.Channel(2)
+        }
+
     def draw(self, screen):
         screen.blit(self.image, (self.x, self.y))
 
@@ -53,6 +65,8 @@ class Player:
     def animation(self):
         if not self.changingLevel:
             if not self.ismoving:
+                if self.soundChannels['run'].get_busy():
+                    self.soundChannels['run'].stop()
                 if self.dirrection['left']:
                     self.image = self.animatePlayer(
                         self.spriteSheets['idle']['image'],
@@ -73,6 +87,8 @@ class Player:
                     )
                     
             if self.ismoving:
+                if not self.soundChannels['run'].get_busy():
+                    self.soundChannels['run'].play(self.sounds['run'])
                 if self.dirrection['left']:
                     self.image = self.animatePlayer(
                         self.spriteSheets['run']['image'],
@@ -93,6 +109,11 @@ class Player:
                     )
                 
         if self.changingLevel:
+            if self.soundChannels['run'].get_busy():
+                self.soundChannels['run'].stop()
+            if not self.soundChannels['openDoor'].get_busy():
+                self.soundChannels['openDoor'].play(self.sounds['openDoor'])
+
             self.image = self.animatePlayer(
                 self.spriteSheets['enterDoor']['image'],
                 self.spriteSheets['enterDoor']['frameRate'],
@@ -147,8 +168,10 @@ class Player:
             any(self.hitbox.bottomRect.colliderect(tile) for tile in background.tiles.lists['platformUpPass']) or \
             any(self.hitbox.bottomRect.colliderect(tile) for tile in background.tiles.lists['box']):
                 self.velocity_y = -JUMP_HEIGHT
+                self.soundChannels['jump'].play(self.sounds['jump'])
             if any(self.hitbox.bottomRect.colliderect(tile) for tile in background.tiles.lists['blockEnemy']):
                 self.velocity_y = -BOOST_JUMP
+                self.soundChannels['jump'].play(self.sounds['highJump'])
 
     def reset(self):
         self.x, self.y = background.collitionbox.levels[background.collitionbox.currentLevel]['spawnPoint']

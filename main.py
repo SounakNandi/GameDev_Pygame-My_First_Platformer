@@ -9,6 +9,7 @@ from Assets.Blocks import blocks
 class Game:
     def __init__(self):
         pygame.init()
+        pygame.mixer.init()
         self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.NOFRAME)
         pygame.display.set_caption('Pygame_SN')
         self.clock = pygame.time.Clock()
